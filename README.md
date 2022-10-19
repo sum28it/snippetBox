@@ -15,4 +15,4 @@
 * MySQL database.
 * SSL/TLS web server using HTTP 2.0.
 * Generated HTML via Golang templates.
-* CRSF protection.
+* CSRF( Cross-Site Request Forgery) protection.
