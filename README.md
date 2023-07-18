@@ -1,21 +1,21 @@
 # Snippet Box
 
-#### This is a full stack CRUD web application written in GO. Users can create text snippets and share (like Github gists)on the web.
+## Introduction
 
-## Tech Stack Used
-* Go(lang)
-* Gorilla
-* MySQL
+This is a full stack CRUD web application written in GO. Users can create text snippets and share (like Github gists)on the web.
 
-## Learnings
-* <b>Server Side Rendering</b>- Server-side rendering (SSR) is an application's ability to convert HTML files on the server into a fully rendered HTML page for the client. The web browser submits a request for information from the server, which instantly responds by sending a fully rendered page to the client.
+## Features
 
-* <b>SSL/TLS web server using HTTP 2.0</b>- HTTP/2 is a major revision of the HTTP network protocol used by the World Wide Web. It was derived from the earlier experimental SPDY protocol, originally developed by Google.[Learn more about HTTP 2.0]
-* <b>CSRF( Cross-Site Request Forgery) protection</b>- Cross-site request forgery, also known as one-click attack or session riding and abbreviated as CSRF or XSRF, is a type of malicious exploit of a website or web application where unauthorized commands are submitted from a user that the web application trusts
+- __Authentication:__ This application uses JWT to authenticate client requests and provide login/signup or logout features. Passwords are stoted securely after hashing on the client side.
+- __Sessions:__ Session is a way of maintaining state information about a user's interactions with a website or web application. A session allows the server to keep track of information such as the user's login status and preferences. In this app we've used cookies(simple to implement) to store user sessions.
+- __Middlewrare:__ A middleware is a function that comes in between the request-response cycle, does something and then calls the next middleware in line. In this application,they are used for authentication, logging and panic recovery.
+- __Dependency injection(DI):__ It's one of the most common design pattern to provide dependencies to an object. Here, __DI__ is used to provide handlers- db, logger and other dependencies.
+- __Database:__ We've used MySQL as our database to persist user and snippet data. MySQL is simple to use and model data with relationship.
+- __Graceful Shutdown:__ Shutting down abruptly when something bad happens can cause unpleasant user experience, resource leakage and buffers being not flushed. So, graceful shutdown is implemented to let active requests terminate, buffer's flush and not to accept new connections.
 
-* <b>Graceful Shutdown</b>-     All pending processes (web request, loops) are completed and no new processes should start and no new web requests should be accepted. Closing all open connections to external services and databases.
 ## Useful Links-
-* [Gorilla](https://www.gorillatoolkit.org/)
-* [HTTP 2.0](https://www.imperva.com/learn/performance/http2/)
-* [CSRF](https://www.imperva.com/learn/application-security/csrf-cross-site-request-forgery/)
-* [RESTful API Design](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)
+
+- [Gorilla](https://www.gorillatoolkit.org/)
+- [HTTP 2.0](https://www.imperva.com/learn/performance/http2/)
+- [CSRF](https://www.imperva.com/learn/application-security/csrf-cross-site-request-forgery/)
+- [RESTful API Design](https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design)
