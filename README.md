@@ -15,20 +15,20 @@ This is a full stack CRUD web application written in GO. Users can create text s
 
 ## Up and Running
 
-Clone the repo using
+__Clone the repo:__
 
 ``` git
 git clone github.com/sum28it/snippetBox
 ```
 
-Install postgreSQL from [here](https://www.postgresql.org/download/). 
+Install postgreSQL from [here](https://www.postgresql.org/download/).
 Create a database and a role for it's user. Grant privileges to the user using command
 
 ``` shell
 GRANT ALL PRIVILEGES ON SCHEMA public TO username;
 ```
 
-Create tables
+__Create the following tables to store data.__
 
 ``` postgresql
 
@@ -51,7 +51,7 @@ ALTER TABLE users ADD CONSTRAINT users_uc_email UNIQUE (email);
 
 ```
 
-Generate tls certificates by running:
+__Generate tls certificates by running:__
 
 ```go
 go run tls_cert_gen/generate_cert.go
@@ -59,10 +59,24 @@ go run tls_cert_gen/generate_cert.go
 
 Update the dsn string to connect to postgres in main.go or, provide it as a command line flag.
 
-Now, start the server using
+__Now, start the server using:__
 
 ```go
 go run cmd/web/nmain.go --dsn="your_dsn_string"
+```
+
+## Api Endpoints
+
+```http
+GET: /
+GET: /snippet/new
+POST:/snippet/new
+GET: /snippet/:id
+GET: /user/signup
+POST:/user/signup
+GET: /user/login
+POST:/user/login
+POST: /user/logout
 ```
 
 ## Useful Links-
