@@ -67,7 +67,7 @@ go run cmd/web/nmain.go --dsn="your_dsn_string"
 
 ## Api Endpoints
 
-```http
+```text
 GET: /
 GET: /snippet/new
 POST:/snippet/new
