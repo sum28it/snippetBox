@@ -23,6 +23,6 @@ func (app *App) RunServer() {
 	}
 
 	log.Printf("Server listening on %s", app.Addr)
-	err := srv.ListenAndServeTLS(app.TLSCert, app.TLSKey)
+	err := srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	log.Fatal(err)
 }

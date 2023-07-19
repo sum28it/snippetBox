@@ -3,8 +3,9 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
-	"github.com/go-sql-driver/mysql"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,7 +20,7 @@ type Database struct {
 
 func (db *Database) GetSnippet(id int) (*Snippet, error) {
 	stmt := `SELECT id, title, content, created, expires FROM snippets
-	WHERE expires > UTC_TIMESTAMP() AND id = ?`
+	WHERE expires > CURRENT_TIMESTAMP AND id = $1`
 
 	row := db.QueryRow(stmt, id)
 
@@ -37,13 +38,12 @@ func (db *Database) GetSnippet(id int) (*Snippet, error) {
 
 func (db *Database) LatestSnippets() (Snippets, error) {
 	stmt := `SELECT id, title, content, created, expires FROM snippets
-	WHERE expires > UTC_TIMESTAMP() ORDER BY created DESC LIMIT 10`
+	WHERE expires > CURRENT_TIMESTAMP ORDER BY created DESC LIMIT 10`
 
 	rows, err := db.Query(stmt)
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
 
 	snippets := Snippets{}
@@ -58,7 +58,6 @@ func (db *Database) LatestSnippets() (Snippets, error) {
 
 		snippets = append(snippets, s)
 	}
-
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
@@ -68,19 +67,26 @@ func (db *Database) LatestSnippets() (Snippets, error) {
 
 func (db *Database) InsertSnippet(title, content, expires string) (int, error) {
 	stmt := `INSERT INTO snippets (title, content, created, expires)
-	VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? SECOND))`
+	VALUES($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP+ ($3 || 'SECOND')::INTERVAL) RETURNING id`
 
-	result, err := db.Exec(stmt, title, content, expires)
+	fmt.Println("Debugging", "database.InsertSnippet72")
+
+	rows, err := db.Query(stmt, title, content, expires)
 	if err != nil {
 		return 0, err
 	}
+	fmt.Println("Debugging", "database.InsertSnippet78")
+	var id int
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, nil
+	if rows.Next() {
+		err = rows.Scan(&id)
+		if err != nil {
+			fmt.Println(err)
+			return 0, nil
+		}
 	}
-
-	return int(id), nil
+	fmt.Println("Debugging", "database.InsertSnippet84")
+	return id, nil
 }
 
 func (db *Database) InsertUser(name, email, password string) error {
@@ -89,16 +95,16 @@ func (db *Database) InsertUser(name, email, password string) error {
 		return err
 	}
 
-	stmt := `INSERT INTO users (name, email, password, created)
-	VALUES(?, ?, ?, UTC_TIMESTAMP())`
+	stmt := `INSERT INTO users (name, email, hashed_password, created)
+	VALUES($1, $2, $3, CURRENT_TIMESTAMP)`
 
 	_, err = db.Exec(stmt, name, email, hashedPassword)
 	if err != nil {
-		if err.(*mysql.MySQLError).Number == 1062 {
+		pqErr, _ := err.(*pq.Error)
+		if pqErr.Code == "23505" {
 			return ErrDuplicateEmail
 		}
 	}
-
 	return err
 }
 
@@ -106,20 +112,18 @@ func (db *Database) VerifyUser(email, password string) (int, error) {
 	var id int
 	var hashedPassword []byte
 
-	row := db.QueryRow("SELECT id, password FROM users WHERE email = ?", email)
+	row := db.QueryRow("SELECT id, hashed_password FROM users WHERE email = $1", email)
 	err := row.Scan(&id, &hashedPassword)
 	if err == sql.ErrNoRows {
 		return 0, ErrInvalidCredentials
 	} else if err != nil {
 		return 0, err
 	}
-
 	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
 		return 0, ErrInvalidCredentials
 	} else if err != nil {
 		return 0, err
 	}
-
 	return id, nil
 }
